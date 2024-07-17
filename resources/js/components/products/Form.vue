@@ -86,9 +86,7 @@ import { useRouter } from "vue-router";
                 <input type="file" @change="handleFileChange" class="form-control" multiple>
                 <img :src="getImage()" alt="Imagen de producto" class="img-thumbnail mt-2" width="100">
             </div>
-        </div>                    
-                    
-        
+        </div>                                                
         <div class="col-12">
             <button @click="handleSave" class="btn btn-primary">Guardar</button>
         </div>
