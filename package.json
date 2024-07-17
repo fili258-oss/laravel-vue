@@ -13,5 +13,8 @@
         "vue": "^3.4.31",
         "vue-loader": "^17.4.2",
         "vue-router": "^4.4.0"
+    },
+    "dependencies": {
+        "sweetalert2": "^11.12.2"
     }
 }

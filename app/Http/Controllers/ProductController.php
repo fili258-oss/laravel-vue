@@ -1,15 +1,32 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\DB;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Intervention\Image\Laravel\Facades\Image;
 
 class ProductController extends Controller
-{
+{    
+    public function index()
+    {
+        $products = DB::table('products')->get();
+        return response()->json([
+            'products' => $products
+        ],200);
+        
+
+
+    }
     public function store(Request $request)
     {
+        $request->validate([
+            'name' => 'required',
+            'description' => 'required',
+            'price' => 'required',
+            'quantity' => 'required'
+        ]);
+
         $product = new Product();
         $product->name = $request->name;
         $product->description = $request->description;

@@ -1,6 +1,7 @@
 <script setup>
 import axios from 'axios';
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
+import { useRouter } from "vue-router";
 
     const form = reactive({
         name: "",
@@ -11,6 +12,8 @@ import { reactive } from 'vue';
         price: ""
     })
 
+    const router = useRouter()
+    const errors = ref([])
     const getImage = () => {
         let image = "/upload/no-picture.png"
         if (form.image) {
@@ -33,25 +36,32 @@ import { reactive } from 'vue';
         reader.readAsDataURL(file)
 
     }
-    const handleSave = () => {
-        e.preventDefault();
+    const handleSave = () => {        
         axios.post('/api/products', form)
+        .then((response) => {
+            router.push('/')
+            toast.fire({ icon:"success", title:"Producto creado éxitosamente"})
+        })
+        .catch((error) => {
+            if (error.response.status === 422) {
+                errors.value = error.response.data.errors
+            }
+        })
     }
 
-    const handleSaveSuccess = () => {
-        alert("Registro guardado exitosamente!")
-    }
 </script>
 <template>
     <section>
-        <form class="row g-3 mt-4">
+        <div class="row">
             <div class="col-md-6">
                 <label for="nameProduct" class="form-label">Nombre del producto</label>
                 <input type="text" v-model="form.name" class="form-control" id="nameProduct">
+                <small class="text-danger" v-if="errors.name">{{ errors.name }}</small>
             </div>
             <div class="col-6">
                 <label for="priceProduct" class="form-label">Precio</label>
                 <input type="number" v-model="form.price" class="form-control" id="priceProduct" placeholder="Ej:200000">
+                <small class="text-danger" v-if="errors.price">{{ errors.price }}</small>
             </div>
             <div class="col-md-6">
                 <label for="categoryProduct" class="form-label">Categoría</label>
@@ -63,21 +73,24 @@ import { reactive } from 'vue';
             </div>
             <div class="col-md-6">
                 <label for="inputState" class="form-label">Inventario</label>
-                <input type="number" v-model="form.inventary" class="form-control" placeholder="Ej:15">
+                <input type="number" v-model="form.quantity" class="form-control" placeholder="Ej:15">
+                <small class="text-danger" v-if="errors.quantity">{{ errors.quantity }}</small>
             </div>
             <div class="col-md-12">
                 <label for="inputPassword4" class="form-label">Descripción del producto</label>
                 <textarea v-model="form.description" name="descriptionProduct" class="form-control" id="descriptionProduct" placeholder="Agrega tu descripción"></textarea>
+                <small class="text-danger" v-if="errors.description">{{ errors.description }}</small>
             </div>
             <div class="col-12">
                 <label for="formFileMultiple" class="form-label">Fotografías</label>                
                 <input type="file" @change="handleFileChange" class="form-control" multiple>
                 <img :src="getImage()" alt="Imagen de producto" class="img-thumbnail mt-2" width="100">
-            </div>            
-            
-            <div class="col-12">
-                <button @click="handleSave" class="btn btn-primary">Guardar</button>
             </div>
-        </form>
+        </div>                    
+                    
+        
+        <div class="col-12">
+            <button @click="handleSave" class="btn btn-primary">Guardar</button>
+        </div>
     </section>
 </template>
