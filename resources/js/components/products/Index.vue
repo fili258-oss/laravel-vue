@@ -1,16 +1,14 @@
 <script setup>
     import axios from "axios";
-    import { onMounted, ref, reactive } from "vue";
-    import { useRouter } from "vue-router";
-
-    const router = useRouter()
+    import { onMounted, ref, reactive } from "vue";        
 
     let products = ref([])
 
     onMounted(async () => {
         getProducts()
     })
-    const newProduct = () => {
+    const newProduct = () => {                
+        cleanForm();
         $("#createProductModal").modal('show');
         console.log("Crear producto...")
         //router.push('/products/create')
@@ -31,8 +29,12 @@
         })
         
     }
+
     /* Codigo para guardar un producto */
     const form = reactive({
+        isLoading:false,
+        actionForm:false,
+        idProduct:'',
         name: "",
         description: "",
         image: "",
@@ -64,19 +66,97 @@
         reader.readAsDataURL(file)
 
     }
-    const handleSave = () => {        
+
+    const handleSave = () => {
+        form.isLoading = true;
+        if (form.actionForm)
+        {
+            updateProduct();
+        }else
+        {
+            createProduct();
+        }
+        
+    }
+    
+    const createProduct = () => {        
         axios.post('/api/products', form)
         .then((response) => {                                   
-            getProducts()
-            toast.fire({ icon:"success", title:"Producto creado éxitosamente"})
+            if(response)
+            {
+                form.isLoading = false;
+                $("#createProductModal").modal('hide');
+                toast.fire({ icon:"success", title:"Producto creado éxitosamente"})
+                getProducts()                                
+            }
             
 
         })
         .catch((error) => {
             if (error.response.status === 422) {
                 errors.value = error.response.data.errors
+                form.isLoading = false;
             }
         })
+    }
+
+    /* Código para editar un producto */
+    const handleEdit = (idProduct) => {
+        errors.value = '';       
+        form.idProduct = idProduct;
+        form.actionForm = true;        
+        getProduct();
+        
+    }
+
+    const getProduct = async () =>{
+
+        let response = await axios.get(`/api/products/${form.idProduct}/edit`)
+        .then((response) =>{
+            if (response) {
+                form.name = response.data.product.name
+                form.description = response.data.product.description
+                form.image = response.data.product.image
+                form.type = response.data.product.type
+                form.quantity = response.data.product.quantity
+                form.price = response.data.product.price
+                $("#createProductModal").modal('show');
+            }
+        })
+    }
+
+    const updateProduct = async () =>{
+        axios.put(`/api/products/${form.idProduct}`, form)
+        .then((response) => {                                   
+            if(response)
+            {
+                form.isLoading = false;
+                $("#createProductModal").modal('hide');
+                toast.fire({ icon:"success", title:"Producto actualizado éxitosamente"})
+                getProducts()                                
+            }
+            
+
+        })
+        .catch((error) => {
+            if (error.response.status === 422) {
+                errors.value = error.response.data.errors
+                form.isLoading = false;
+            }
+        })
+    }
+
+    const cleanForm = () =>{
+        errors.value = '';
+        form.isLoading = false;
+        form.actionForm = false;
+        form.idProduct = '';
+        form.name = '';
+        form.description = '';
+        form.image = '';
+        form.type = 0;
+        form.quantity = '';
+        form.price = '';
     }
 </script>
 <template>
@@ -139,7 +219,7 @@
                     <div>{{product.type}}</div>
                 </td>
                 <td>
-                    <button type="button" class="btn btn-sm btn-outline-primary activeDT">Editar</button>        
+                    <button @click="handleEdit(product.id)" type="button" class="btn btn-sm btn-outline-primary activeDT">Editar</button>        
                 </td>
             </tr>
             </tbody>
@@ -150,7 +230,8 @@
     <div class="modal-dialog">
         <div class="modal-content">
         <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Crear un producto nuevo</h5>
+            <h5 v-if="form.actionForm" class="modal-title" id="exampleModalLabel">Editar producto</h5>
+            <h5 v-else="form.actionForm" class="modal-title" id="exampleModalLabel">Crear producto</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -193,7 +274,12 @@
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button @click="handleSave" class="btn btn-primary">Guardar</button>
+            <!--<button @click="handleSave" class="btn btn-primary">Guardar</button>-->
+            <button @click="handleSave" :disabled="form.isLoading" type="submit" class="btn btn-primary" >
+                <span v-if="form.isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span v-if="form.isLoading"> Guardando...</span>
+                <span v-else>Guardar </span>                        
+          </button>
         </div>
         </div>
     </div>
