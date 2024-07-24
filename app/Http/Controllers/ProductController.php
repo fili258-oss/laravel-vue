@@ -98,4 +98,18 @@ class ProductController extends Controller
         $product->save();
 
     }
+
+    public function destroy($id)
+    {
+        $product = Product::find($id);
+        $image_path = public_path() . "/upload/";
+        $image = $image_path . $product->image;
+
+        if (file_exists($image)) {
+            @unlink($image);
+        }
+        $product->delete();
+
+
+    }
 }

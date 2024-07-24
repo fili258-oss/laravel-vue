@@ -147,6 +147,7 @@
     }
 
     const cleanForm = () =>{
+
         errors.value = '';
         form.isLoading = false;
         form.actionForm = false;
@@ -158,6 +159,48 @@
         form.quantity = '';
         form.price = '';
     }
+
+    /* Código para eliminar un producto */
+    const handleDelete = (idProduct) =>{
+        errors.value = '';       
+        form.idProduct = idProduct;
+        form.actionForm = false;
+
+        Swal.fire({
+        title: "¿Estas seguro?",
+        text: "Ya no podrás revertir esta acción!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Si, bórralo!",
+        cancelButtonText: "Cancelar",
+        }).then((result) => {
+        if (result.isConfirmed) {
+            destroyProduct();            
+        }
+        });
+    }
+
+    const destroyProduct = async () =>{
+        axios.delete(`/api/products/${form.idProduct}/delete`)
+        .then((response) => {                                   
+            if(response)
+            {                                
+                toast.fire({ icon:"success", title:"Producto eliminado éxitosamente"})
+                getProducts()                                
+            }
+            
+
+        })
+        .catch((error) => {
+            if (error.response.status === 422) {
+                errors.value = error.response.data.errors
+                form.isLoading = false;
+            }
+        })
+    }
+
 </script>
 <template>
     <div class="row mt-4">
@@ -219,7 +262,8 @@
                     <div>{{product.type}}</div>
                 </td>
                 <td>
-                    <button @click="handleEdit(product.id)" type="button" class="btn btn-sm btn-outline-primary activeDT">Editar</button>        
+                    <button @click="handleEdit(product.id)" type="button" class="btn btn-sm btn-outline-primary activeDT">Editar</button>&nbsp;
+                    <button @click="handleDelete(product.id)" type="button" class="btn btn-sm btn-outline-danger">Eliminar</button>        
                 </td>
             </tr>
             </tbody>
