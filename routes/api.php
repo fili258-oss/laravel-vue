@@ -1,6 +1,7 @@
 <?php
 
-use App\Http\Controllers\ProductController;
+use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -25,3 +26,8 @@ Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{product}/edit', [ProductController::class, 'edit']);
 Route::put('/products/{product}', [ProductController::class, 'update']);
 Route::delete('/products/{product}/delete', [ProductController::class, 'destroy']);
+
+Route::controller(AuthController::class)->group(function(){
+    Route::post('login','login');
+    Route::post('register','register');
+});
