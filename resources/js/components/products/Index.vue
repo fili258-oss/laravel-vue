@@ -203,7 +203,8 @@
 
 </script>
 <template>
-    <div class="row mt-4">
+    <div class="container">
+        <div class="row mt-4">
         <div class="col-lg-6">
             <div class="form-group">                
                 <h1>Listado de productos</h1>
@@ -269,6 +270,8 @@
             </tbody>
         </table>
     </div>
+    </div>
+
     <!-- Modal -->
     <div class="modal fade" id="createProductModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">

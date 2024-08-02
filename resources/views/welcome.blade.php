@@ -17,7 +17,7 @@
 
     </head>
     <body>
-        <main class="container">
+        <main>
             <div id="app"></div>
         </main>
         <!-- jquery -->
